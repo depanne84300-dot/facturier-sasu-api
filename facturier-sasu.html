@@ -78,12 +78,12 @@ textarea {
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  gap: 10px;
-  flex-wrap: wrap; /* IMPORTANT mobile */
+  gap: 15px;
 }
 
+/* LOGO */
 .logo {
-  width: 180px;
+  width: 160px;
   flex-shrink: 0;
 }
 
@@ -92,26 +92,26 @@ textarea {
   object-fit: contain;
 }
 
+/* CENTRE */
 .centerColumn {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-
-  position: static;   /* FIX IMPORTANT */
-  transform: none;    /* FIX IMPORTANT */
 }
 
+/* DROITE */
 .rightColumn {
-  width: 320px;
+  flex: 1;
   display: flex;
   justify-content: flex-end;
-  flex-shrink: 0;
 }
 
+/* BOX SASU */
 .companyBox {
   width: 100%;
+  max-width: 280px;   /* 🔥 important */
   background: #e3f2fd;
   padding: 15px;
   border-radius: 8px;
@@ -122,7 +122,6 @@ textarea {
   position: relative;
   left: var(--sasu-offset, 0px);
 }
-
 /* ============ SASU OFFSET ============ */
 :root {
   --sasu-offset: -190px;
@@ -1106,7 +1105,26 @@ body.facture-mode .colTitle {
   }
 }
 
+@media (max-width: 768px) {
 
+  .header {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .logo {
+    width: 120px;
+  }
+
+  .rightColumn {
+    justify-content: center;
+  }
+
+  .companyBox {
+    max-width: 100%;
+    left: 0 !important;
+  }
+}
 
 
 
