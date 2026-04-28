@@ -1,18 +1,15 @@
- 
-<style>
-/* =============================<head>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Facturier Univers Thermique</title>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-
-
- BASE ============================= */
+ 
+<style>
+/* ============================= BASE ============================= */
 
 
 body {
@@ -74,27 +71,30 @@ textarea {
 
 /* ============================= HEADER ============================= */
 .header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  align-items: start;
-  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 10px;
+}
+
+/* équilibre des 3 blocs */
+.header > div {
+  flex: 1;
 }
 
 /* LOGO */
 .logo {
-  justify-self: start;
-  width: 140px;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .logo img {
-  width: 100%;
-  display: block;
+  max-width: 180px;
+  height: auto;
 }
 
-/* CENTRE (TOGGLE) */
+/* CENTRE */
 .centerColumn {
-  justify-self: center;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -102,34 +102,25 @@ textarea {
 
 /* DROITE */
 .rightColumn {
-  justify-self: end;
   display: flex;
   justify-content: flex-end;
 }
 
-/* SASU */
+/* SOCIÉTÉ */
 .companyBox {
   width: 100%;
-  max-width: 260px;
-  background: #e3f2fd;
-  padding: 12px;
-  border-radius: 8px;
-  box-sizing: border-box;
+  max-width: 280px;
 }
 
-
-
-/* ============ SASU OFFSET ============ */
-:root {
-  --sasu-offset: -190px;
-}
-
-/* ================= PRINT ================= */
 @media print {
   .companyBox {
     left: calc(var(--sasu-offset-print, 0px) + 90px);
   }
 }
+:root {
+  --sasu-offset: -190px; /* ajuste ici pour déplacer à gauche */
+}
+
 
 /* ============================= SECTIONS ============================= */
 .section {
@@ -364,25 +355,20 @@ textarea.desc {
 
 
 /* ============================= TITRES DEVIS / FACTURE ============================= */
-#docTitle, #typeLabel {
-  font-size: 22px;
+#docTitle, #typeLabel, .docTitle {
+  font-size: 24px;              /* même taille que .colTitle */
   font-weight: bold;
   text-transform: uppercase;
-
+  padding: 12px;                /* même padding */
+  border-radius: 10px;
   background: #0b2a5b;
   color: white;
-
-  padding: 10px 18px;
-  border-radius: 10px;
-
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-
-  min-width: 160px;
+  display: block;               /* 👈 IMPORTANT */
+  width: 100%;                  /* 👈 prend toute la largeur */
   text-align: center;
-
-  white-space: nowrap;
+  box-sizing: border-box;
+  cursor: pointer;
+  letter-spacing: 1px;
 }
 
 #civiliteClient {
@@ -962,160 +948,14 @@ body.facture-mode .colTitle {
 
 @media (max-width: 768px) {
 
-  body {
-    margin: 0;
-    padding: 10px;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  .container, .main, .wrapper {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .row, .flex, .ligne, .header {
-    display: flex;
-    flex-direction: column !important;
-  }
-
-  .left, .right, .col, .bloc {
-    width: 100% !important;
-  }
-
-  input, textarea, select {
-    width: 100% !important;
-    font-size: 16px;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-
-}
-
-@media (max-width: 768px) {
-
-  .header {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .centerColumn {
-    order: 1;
-    width: 100%;
-  }
-
-  .logo {
-    order: 2;
-    width: 140px;
-  }
-
-  .rightColumn {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-  }
-
-}
-
-
-@media (max-width: 768px) {
-
-  .header {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .logo {
-    width: 140px;
-  }
-
-  .rightColumn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .companyBox {
-    left: 0 !important;
-  }
-}
-
-@media (max-width: 768px) {
-
-  .header {
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-  }
-
-  .logo {
-    width: 140px;
-    display: flex;
-    justify-content: center;
-  }
-
-  .centerColumn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .rightColumn {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
-  .companyBox {
-    width: 90%;
-    left: 0 !important;
-  }
-}
-
-@media (max-width: 768px) {
-
   .header {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 10px;
   }
 
   .logo {
-    width: 120px;
-    margin: 0 auto;
-  }
-
-  .centerColumn {
-    width: 100%;
     justify-content: center;
-    text-align: center;
-  }
-
-  .rightColumn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .companyBox {
-    position: static !important;
-    width: 95%;
-    margin: 0 auto;
-  }
-}
-
-@media (max-width: 768px) {
-
-  .header {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .logo {
-    width: 120px;
   }
 
   .rightColumn {
@@ -1124,73 +964,58 @@ body.facture-mode .colTitle {
 
   .companyBox {
     max-width: 100%;
-    left: 0 !important;
   }
+
 }
-
-@media (max-width: 768px) {
-  .header {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-
-  .logo,
-  .centerColumn,
-  .rightColumn {
-    justify-self: center;
-  }
-
-  .companyBox {
-    max-width: 100%;
-  }
-}
-
 
 @media print {
-
-  body {
-    background: white !important;
-  }
-
-  #invoiceContent {
-    width: 210mm;
-    padding: 10mm;
-    box-sizing: border-box;
-  }
-
   .header {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between;
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .centerColumn {
+    width: 100%;
+  }
+
+  #docTitle {
+    width: auto;       /* 🔥 enlève le full width */
+    margin: 0 auto;    /* centre parfaitement */
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .logo {
+    width: 100%;
+    justify-content: center;
   }
 
   .logo img {
-    max-width: 140px;
+    max-width: 140px;   /* 🔥 réduit un peu */
+    margin-left: -10px; /* 🔥 petit ajustement gauche */
   }
 
-  .centerColumn {
-    display: flex !important;
-    justify-content: center;
-  }
-
-  .rightColumn {
-    display: flex !important;
-    justify-content: flex-end;
-  }
-
-  /* BLOCS FIXES */
-  .box, .companyBox, .totalBox {
-    break-inside: avoid;
-  }
-
-  table {
-    page-break-inside: auto;
-  }
-
-  tr {
-    page-break-inside: avoid;
-  }
 }
+
+@media (max-width: 768px) {
+
+  .header {
+    gap: 15px; /* 🔥 espace vertical propre */
+  }
+
+}
+
+
+
+
+
+
+
+
 
 
 
