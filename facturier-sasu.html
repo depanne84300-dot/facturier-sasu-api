@@ -83,7 +83,7 @@ textarea {
 
 /* LOGO */
 .logo {
-  width: 160px;
+  width: 150px;
   flex-shrink: 0;
 }
 
@@ -106,22 +106,22 @@ textarea {
   flex: 1;
   display: flex;
   justify-content: flex-end;
+  min-width: 0;
 }
 
 /* BOX SASU */
 .companyBox {
+  max-width: 260px;
   width: 100%;
-  max-width: 280px;   /* 🔥 important */
   background: #e3f2fd;
   padding: 15px;
   border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.5;
   box-sizing: border-box;
-
-  position: relative;
-  left: var(--sasu-offset, 0px);
 }
+
+
+
+
 /* ============ SASU OFFSET ============ */
 :root {
   --sasu-offset: -190px;
@@ -368,17 +368,23 @@ textarea.desc {
 
 /* ============================= TITRES DEVIS / FACTURE ============================= */
 #docTitle, #typeLabel, .docTitle {
-  font-size: 24px;              /* même taille que .colTitle */
+  font-size: 22px;
   font-weight: bold;
   text-transform: uppercase;
-  padding: 12px;                /* même padding */
+  padding: 10px 20px;
   border-radius: 10px;
   background: #0b2a5b;
   color: white;
-  display: block;               /* 👈 IMPORTANT */
-  width: 100%;                  /* 👈 prend toute la largeur */
+
+  display: inline-flex;   /* 🔥 IMPORTANT */
+  justify-content: center;
+  align-items: center;
+
+  width: auto;            /* ❌ enlève 100% */
+  min-width: 140px;
+  max-width: 200px;
+
   text-align: center;
-  box-sizing: border-box;
   cursor: pointer;
   letter-spacing: 1px;
 }
