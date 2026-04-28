@@ -75,48 +75,38 @@ textarea {
 /* ============================= HEADER ============================= */
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
   width: 100%;
-  gap: 15px;
 }
 
 /* LOGO */
 .logo {
-  width: 150px;
-  flex-shrink: 0;
+  flex: 0 0 140px;
 }
 
 .logo img {
   width: 100%;
+  height: auto;
+  display: block;
   object-fit: contain;
 }
 
-/* CENTRE */
+/* CENTRE (DEVIS/FACTURE) */
 .centerColumn {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  text-align: center;
-}
-
-/* DROITE */
-.rightColumn {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
   min-width: 0;
 }
 
-/* BOX SASU */
-.companyBox {
-  max-width: 260px;
-  width: 100%;
-  background: #e3f2fd;
-  padding: 15px;
-  border-radius: 8px;
-  box-sizing: border-box;
+/* DROITE (SASU) */
+.rightColumn {
+  flex: 0 0 260px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 
@@ -367,26 +357,19 @@ textarea.desc {
 
 
 /* ============================= TITRES DEVIS / FACTURE ============================= */
-#docTitle, #typeLabel, .docTitle {
-  font-size: 22px;
+#docTitle, #typeLabel {
+  display: inline-block;
+  font-size: 20px;
   font-weight: bold;
-  text-transform: uppercase;
-  padding: 10px 20px;
+  padding: 8px 18px;
   border-radius: 10px;
   background: #0b2a5b;
   color: white;
-
-  display: inline-flex;   /* 🔥 IMPORTANT */
-  justify-content: center;
-  align-items: center;
-
-  width: auto;            /* ❌ enlève 100% */
-  min-width: 140px;
-  max-width: 200px;
-
-  text-align: center;
   cursor: pointer;
-  letter-spacing: 1px;
+
+  width: fit-content;   /* 🔥 clé du problème */
+  min-width: 120px;
+  text-align: center;
 }
 
 #civiliteClient {
@@ -1147,7 +1130,7 @@ body.facture-mode .colTitle {
 <div id="invoiceContent">
   <div class="header">
     <div class="logo">
-  <img src="/logo.png">
+  <img src="logo.png">
 </div>
 
 
