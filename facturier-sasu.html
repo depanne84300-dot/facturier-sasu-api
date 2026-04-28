@@ -72,55 +72,76 @@ textarea {
 /* ============================= HEADER ============================= */
 .header {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
   gap: 10px;
-}
-
-/* équilibre des 3 blocs */
-.header > div {
-  flex: 1;
 }
 
 /* LOGO */
 .logo {
-  display: flex;
-  justify-content: flex-start;
+  flex: 0 0 33%;
 }
 
 .logo img {
   max-width: 180px;
-  height: auto;
+  width: 100%;
+  object-fit: contain;
 }
 
-/* CENTRE */
+/* CENTRE (DEVIS) */
 .centerColumn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  flex: 0 0 34%;
+  text-align: center;
 }
 
-/* DROITE */
+/* TITRE */
+.docTitle {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* DROITE (SASU) */
 .rightColumn {
+  flex: 0 0 33%;
   display: flex;
   justify-content: flex-end;
 }
 
-/* SOCIÉTÉ */
 .companyBox {
   width: 100%;
-  max-width: 280px;
+  background: #e3f2fd;
+  padding: 15px;
+  border-radius: 8px;
+  box-sizing: border-box;
 }
 
-@media print {
+/* ================= MOBILE FIX ================= */
+@media (max-width: 768px) {
+
+  .header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .logo,
+  .centerColumn,
+  .rightColumn {
+    flex: none;
+    width: 100%;
+  }
+
+  .rightColumn {
+    justify-content: center;
+  }
+
   .companyBox {
-    left: calc(var(--sasu-offset-print, 0px) + 90px);
+    text-align: center;
   }
 }
-:root {
-  --sasu-offset: -190px; /* ajuste ici pour déplacer à gauche */
-}
-
 
 /* ============================= SECTIONS ============================= */
 .section {
@@ -763,9 +784,10 @@ body.facture-mode .colTitle {
   display: block;
 }
 
-.logo img {
-  left: var(--logo-offset, 0px);
-  position: relative;
+ .logo img {
+  position: static;
+  left: 0;
+  max-width: 180px;
 }
 
 @media print {
@@ -777,9 +799,6 @@ body.facture-mode .colTitle {
 
 
 
-:root {
-  --logo-offset: 280px;
-}
 
 
 .centerColumn {
@@ -1079,9 +1098,52 @@ body.facture-mode .colTitle {
   }
 }
 
+@media (max-width: 768px) {
 
+  .header table {
+    table-layout: auto;
+  }
 
+  .header td {
+    display: block;       /* 🔥 transforme les colonnes en blocs */
+    width: 100% !important;
+    text-align: center !important;
+  }
 
+  .logo img {
+    max-width: 140px;
+    margin: 0 auto;
+  }
+
+  .companyBox {
+    margin: 10px auto;
+    text-align: center;
+  }
+
+  #docTitle {
+    margin: 10px auto;
+    display: inline-block;
+  }
+
+}
+
+@media print {
+  .header {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+
+  .centerColumn {
+    text-align: center !important;
+  }
+
+  .companyBox {
+    background: #e3f2fd !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
 
 
 
@@ -1102,38 +1164,32 @@ body.facture-mode .colTitle {
 
     <tr>
 
-      <!-- LOGO (inchangé) -->
-      <td style="width:33%; vertical-align:top; text-align:left;">
-        <div class="logo">
-          <img src="logo.png" style="max-width:180px;">
-        </div>
+      <!-- LOGO -->
+      <td style="width:33%; vertical-align:top;">
+        <img src="logo.png" style="width:160px; max-width:100%; display:block;">
       </td>
 
-      <!-- CENTRE (inchangé) -->
-      <td style="width:34%; vertical-align:top; text-align:center;">
-        <div class="centerColumn">
-          <div id="docTitle" class="docTitle">DEVIS</div>
-        </div>
+      <!-- TITRE -->
+      <td style="width:34%; text-align:center; vertical-align:top;">
+        <div id="docTitle" class="docTitle">DEVIS</div>
       </td>
 
-      <!-- BLOC SOCIÉTÉ (100% identique à toi) -->
+      <!-- ENTREPRISE -->
       <td style="width:33%; vertical-align:top; text-align:right;">
         <div class="companyBox">
-
           <div style="font-weight:bold;font-size:14px;margin-bottom:6px;">
             SASU UNIVERS THERMIQUE
           </div>
 
           <div style="line-height:1.4;">
-            1 RUE DU MONT SAINT LOUP<br />
-            10420 LES NOES-PRES-TROYES<br /><br />
+            1 RUE DU MONT SAINT LOUP<br>
+            10420 LES NOES-PRES-TROYES<br><br>
 
-            <strong>SIRET :</strong> 853 891 505 00028<br />
-            <strong>TVA :</strong> FR72853891505<br /><br />
+            <strong>SIRET :</strong> 853 891 505 00028<br>
+            <strong>TVA :</strong> FR72853891505<br><br>
 
             📞 06 09 90 49 22
           </div>
-
         </div>
       </td>
 
