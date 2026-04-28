@@ -1,0 +1,2083 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Facturier Univers Thermique</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+ 
+<style>
+/* ============================= BASE ============================= */
+
+
+body {
+  font-family: Arial;
+  margin: 0;
+  background: white;
+  font-size: 14px;
+  color: #000;
+}
+
+.line {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.line label {
+  width: 140px;
+  font-weight: bold;
+}
+
+/* ✅ ALIGNEMENT PARFAIT DES CHAMPS */
+.line input {
+  flex: 1;
+  max-width: 250px;   /* 👈 ajuste ici */
+  box-sizing: border-box;
+}
+
+.line select {
+  flex: none;
+}
+
+/* ⚠️ NE PAS TOUCHER (tableau OK) */
+.tableauMat input,
+.tableauMat select {
+  flex: none !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.tableauMat td {
+  vertical-align: top;
+}
+
+textarea {
+  resize: none;
+  min-height: 24px;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: block;           /* ✅ FIX canvas */
+  width: 100%;
+  line-height: 1.4;         /* ✅ stabilité PDF */
+  padding: 4px;
+}
+
+
+
+/* ============================= HEADER ============================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+.logo {
+  width: 200px;
+  flex-shrink: 0;
+}
+.logo img {
+  width: 100%;
+  object-fit: contain;
+}
+.centerColumn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+.rightColumn {
+  width: 320px;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+.companyBox {
+  width: 100%;
+  background: #e3f2fd;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  box-sizing: border-box;
+
+  position: relative;
+  left: var(--sasu-offset, 0px);
+}
+
+
+
+@media print {
+  .companyBox {
+    left: calc(var(--sasu-offset-print, 0px) + 90px);
+  }
+}
+:root {
+  --sasu-offset: -190px; /* ajuste ici pour déplacer à gauche */
+}
+
+
+/* ============================= SECTIONS ============================= */
+.section {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+.section .box {
+  flex: 1;
+  background: #e3f2fd;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #d0ebff;
+}
+.fullWidthBox {
+  background: #0b2a5b;
+  color: white;
+  text-align: center;
+  padding: 12px;
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+/* === ALIGNEMENT FIXE DES BLOCS DEVIS & CLIENT === */
+.twoCols {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;       /* 🧩 Étire les deux colonnes uniformément */
+}
+
+.twoCols .col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.twoCols .col .box {
+  flex: 1;
+  background: #e3f2fd;        /* ton fond bleu clair */
+  border: 1px solid #d0ebff;
+  border-radius: 10px;
+  padding: 15px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* === TITRES COLONNES (DEVIS/FACTURE + CLIENT) === */
+.colTitle {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #0b2a5b;   /* bleu foncé comme CLIENT */
+  color: white;
+  letter-spacing: 1px;
+  user-select: none;
+}
+
+/* Pas d'effet hover ni déplacement */
+.colTitle:hover {
+  transform: none;
+  background: #0b2a5b;
+}
+
+
+
+/* ============================= TABLE ============================= */
+.tableauMat {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  table-layout: fixed;
+}
+.tableauMat th,
+.tableauMat td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+.tableauMat th {
+  background: #e3f2fd;
+}
+.tableauMat th:nth-child(1),
+.tableauMat td:nth-child(1) {
+  width: auto;
+  text-align: left;
+}
+.tableauMat th:nth-child(2),
+.tableauMat td:nth-child(2) {
+  width: 80px;
+}
+.tableauMat th:nth-child(3),
+.tableauMat td:nth-child(3) {
+  width: 60px;
+}
+.tableauMat th:nth-child(4),
+.tableauMat td:nth-child(4) {
+  width: 90px;
+}
+textarea.desc {
+  width: 100%;
+  min-height: 40px;
+  height: auto;
+  overflow: hidden;
+  resize: none;
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+
+/* ============================= TOTAL ============================= */
+.totalBox {
+  margin-left: auto;
+  width: 280px;
+  background: #e3f2fd;
+  padding: 10px;
+  border-radius: 8px;
+}
+.totalLine {
+  display: flex;
+  justify-content: space-between;
+}
+.totalTTC {
+  font-weight: bold;
+  font-size: 18px;
+}
+/* ============================= SIGNATURE ============================= */
+#signatureSection {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+.signatureBox {
+  flex: 1;
+  border: 1px dashed #aaa;
+  min-height: 120px;
+  display: flex;
+  justify-content: flex-start;   /* ⬅ gauche */
+  align-items: flex-start;       /* ⬅ en haut */
+  padding: 12px;
+}
+
+
+
+/* ============================= BOUTONS ============================= */
+#topButtons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+#topButtons button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+.print {
+  background: #3cb371;
+}
+.pdf {
+  background: #e53935;
+}
+.mail {
+  background: #2196f3;
+}
+.new {
+  background: #ff9800;
+}
+/* ============================= MODALE, TVA, PRINT ============================= */
+/* ============================= MODALE ============================= */
+#modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* ============================= PRINT ============================= */
+@media print {
+
+  /* cacher uniquement UI */
+  #topButtons,
+  #historyBox,
+  #modal,
+  button {
+    display: none !important;
+  }
+
+  /* garder EXACT écran */
+  body * {
+    visibility: hidden;
+  }
+
+  #invoiceContent,
+  #invoiceContent * {
+    visibility: visible;
+  }
+
+  #invoiceContent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm;
+  }
+}
+
+
+
+
+#topButtons button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+
+#topButtons button i {
+  margin-right: 6px;
+  font-size: 15px;
+}
+
+
+/* ============================= TITRES DEVIS / FACTURE ============================= */
+#docTitle, #typeLabel, .docTitle {
+  font-size: 24px;              /* même taille que .colTitle */
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 12px;                /* même padding */
+  border-radius: 10px;
+  background: #0b2a5b;
+  color: white;
+  display: block;               /* 👈 IMPORTANT */
+  width: 100%;                  /* 👈 prend toute la largeur */
+  text-align: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+#civiliteClient {
+  width: 60px;
+}
+
+#nomClientComplet {
+  width: 180px;
+}
+
+
+#modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.modalBox {
+  background: white;
+  width: 90%;
+  max-width: 800px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* HEADER */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: #0b2a5b;
+  color: white;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+/* CONTENU SCROLLABLE */
+.modalContent {
+  padding: 15px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* FOOTER */
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  background: #f8f8f8;
+}
+
+/* BOUTONS */
+.modalFooter button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btnPrint { background: #3cb371; color: white; }
+.btnMail { background: #2196f3; color: white; }
+.btnClose { background: #999; color: white; }
+
+
+/* ============================= BOUTONS LIGNES TABLE ============================= */
+
+.btnAddLine {
+  background: #c8e6c9;   /* vert pastel */
+  color: #2e7d32;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btnAddLine:hover {
+  background: #a5d6a7;
+}
+
+.btnDeleteLine {
+  background: #ffcdd2;   /* rouge pastel */
+  color: #c62828;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btnDeleteLine:hover {
+  background: #ef9a9a;
+}
+
+/* ============================= */
+/* STYLE BOUTONS RELIEF PRO */
+/* ============================= */
+
+button {
+
+  background: linear-gradient(145deg, #2f80ed, #1c5fd4);
+
+  border: none;
+
+  color: white;
+
+  padding: 8px 16px;
+
+  border-radius: 6px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+
+  box-shadow:
+    0 4px 6px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+
+}
+
+
+/* ============================= */
+/* HOVER */
+/* ============================= */
+
+button:hover {
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 14px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+
+}
+
+
+/* ============================= */
+/* CLICK (EFFET PRESSION) */
+/* ============================= */
+
+button:active {
+
+  transform: translateY(1px);
+
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.2),
+    inset 0 2px 4px rgba(0,0,0,0.25);
+
+}
+
+
+
+
+
+
+
+
+
+
+/* ================= HISTORIQUE BAR UNIFORME ================= */
+
+#historyBox h3 {
+  font-size: 16px;
+}
+
+#historyBox input,
+#historyBox select {
+  height: 34px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+#historyBox input:focus,
+#historyBox select:focus {
+  border-color: #0b2a5b;
+}
+
+/* container de contrôle */
+#historyBox .history-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* bouton tri */
+#historySortDir {
+  height: 34px;
+  width: 38px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #e3f2fd;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#historySortDir:hover {
+  background: #d0e8ff;
+}
+
+
+.pdf-mode #topButtons,
+.pdf-mode #historyBox,
+.pdf-mode #addGlobal,
+.pdf-mode #deleteGlobal {
+  display: none !important;
+}
+
+/* ============================= */
+/* THEME BOUTONS FACTURIER PRO */
+/* ============================= */
+
+button {
+
+  border: none;
+
+  padding: 8px 16px;
+
+  border-radius: 6px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+
+  color: white;
+
+  box-shadow:
+    0 4px 6px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.15);
+
+}
+
+
+/* ============================= */
+/* HOVER GLOBAL */
+/* ============================= */
+
+button:hover {
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 14px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+
+}
+
+
+/* ============================= */
+/* CLICK GLOBAL */
+/* ============================= */
+
+button:active {
+
+  transform: translateY(1px);
+
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.2),
+    inset 0 2px 4px rgba(0,0,0,0.25);
+
+}
+
+
+/* ============================= */
+/* AJOUTER LIGNE */
+/* ============================= */
+
+button[onclick*="ajouter"] {
+
+  background: linear-gradient(145deg,#2f80ed,#1c5fd4);
+
+}
+
+
+/* ============================= */
+/* PDF */
+/* ============================= */
+
+button[onclick*="PDF"] {
+
+  background: linear-gradient(145deg,#eb5757,#c0392b);
+
+}
+
+
+/* ============================= */
+/* IMPRIMER */
+/* ============================= */
+
+button[onclick*="print"] {
+
+  background: linear-gradient(145deg,#2d9cdb,#1b6fa8);
+
+}
+
+
+/* ============================= */
+/* MAIL */
+/* ============================= */
+
+button[onclick*="mail"] {
+
+  background: linear-gradient(145deg,#27ae60,#1e8449);
+
+}
+
+
+/* ============================= */
+/* HISTORIQUE */
+/* ============================= */
+
+button[onclick*="history"] {
+
+  background: linear-gradient(145deg,#828282,#4f4f4f);
+
+}
+
+
+/* ============================= */
+/* SUPPRESSION LIGNE */
+/* ============================= */
+
+button.deleteLine {
+
+  background: linear-gradient(145deg,#ff6b6b,#c0392b);
+
+}
+
+#bonPourAccord {
+  align-items: flex-start;
+  padding: 12px;
+}
+
+.bpaContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  font-size: 14px;
+}
+
+ #bpaNomClient {
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.facture-mode .bpaBox {
+  display: none !important;
+}
+
+/* ================= DEVIS ================= */
+body.devis-mode #docTitle,
+body.devis-mode #typeLabel,
+body.devis-mode .colTitle {
+  background: #0b2a5b;
+}
+
+/* ================= FACTURE ================= */
+body.facture-mode #docTitle,
+body.facture-mode #typeLabel,
+body.facture-mode .colTitle {
+  background: #007c91; /* bleu-vert pro */
+}
+
+.logo {
+  position: relative;
+  display: block;
+}
+
+.logo img {
+  left: var(--logo-offset, 0px);
+  position: relative;
+}
+
+@media print {
+  .logo img {
+    left: calc(var(--logo-offset-print, 0px) - 15px);
+    position: relative;
+  }
+}
+
+
+
+:root {
+  --logo-offset: 280px;
+}
+
+
+.centerColumn {
+  top: 80px; /* 👈 descend le bouton */
+}
+
+
+.centerColumn {
+  top: 80px; /* 👈 descend le bouton */
+}
+
+@media print {
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+}
+
+@media print {
+
+  body {
+    background: white;
+  }
+
+  .fullWidthBox,
+  .colTitle,
+  #docTitle,
+  #typeLabel {
+    background: #0b2a5b !important;
+    color: white !important;
+  }
+
+  .box,
+  .companyBox,
+  .totalBox {
+    background: #e3f2fd !important;
+  }
+
+}
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  table, tr, td {
+    page-break-inside: avoid;
+  }
+
+  .signatureBox {
+    page-break-inside: avoid;
+  }
+}
+/* ===== PRINT / PDF PRO ===== */
+@media print {
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  .box,
+  .signatureBox,
+  .totalBox {
+    page-break-inside: avoid;
+  }
+}
+
+@media print {
+
+  body {
+    background: white !important;
+  }
+
+  #invoiceContent {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 10mm;
+    box-sizing: border-box;
+  }
+}
+
+@media print {
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .logo img {
+    max-width: 160px;
+    height: auto;
+  }
+
+  .companyBox {
+    font-size: 11px;
+    line-height: 1.3;
+  }
+
+}
+
+@media print {
+
+  .tableauMat {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .tableauMat th,
+  .tableauMat td {
+    border: 1px solid #999;
+    padding: 6px;
+  }
+
+  .tableauMat th {
+    background: #e3f2fd !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+}
+
+@media print {
+
+  .totalBox {
+    width: 250px;
+    margin-left: auto;
+    font-size: 13px;
+  }
+
+  .signatureBox {
+    min-height: 100px;
+    border: 1px dashed #999;
+  }
+
+}
+
+@media print {
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</style>
+</head>
+<body>
+<div id="invoiceContent">
+  <div class="header">
+    <div class="logo">
+  <img src="data:image/png;base64,XXXXX" style="width:100%;object-fit:contain;">
+</div>
+
+
+    <div class="centerColumn"><div id="docTitle" class="docTitle">DEVIS</div></div>
+    <div class="rightColumn">
+      <div class="companyBox">
+        <div style="font-weight:bold;font-size:14px;margin-bottom:6px;">
+          SASU UNIVERS THERMIQUE
+        </div>
+        <div style="line-height:1.4;">
+          1 RUE DU MONT SAINT LOUP<br />10420 LES NOES-PRES-TROYES<br /><br />
+          <strong>SIRET :</strong> 853 891 505 00028<br />
+          <strong>TVA :</strong> FR72853891505<br /><br />
+          📞 06 09 90 49 22
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- CLIENT / FACTURE -->
+  <div class="section twoCols">
+    <div class="col">
+      <div class="colTitle" id="typeLabel">DEVIS</div>
+      <div class="box uniformBox">
+        <div class="line"><label>Numéro</label><input id="factureNumero" /></div>
+        <div class="line"><label>Client</label><input id="nomClient" /></div>
+        <div class="line"><label>Date</label><input id="dateFacture" placeholder="JJ/MM/AAAA" maxlength="10" /></div>
+        <div class="line"><label>Référence</label>
+          <select id="tvaMode">
+            <option value="20">20%</option>
+            <option value="10">10%</option>
+            <option value="5.5">5.5%</option>
+            <option value="auto">0%</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="colTitle">CLIENT</div>
+      <div class="box uniformBox">
+        <div class="line">
+          <label>Nom</label>
+          <div style="display:flex;gap:5px;">
+            <select id="civiliteClient" style="flex:0 0 60px;">
+              <option>Mr</option>
+              <option>Mme</option>
+              <option>Mlle</option>
+              <option>Ste</option>
+              <option>Ets</option>
+            </select>
+            <input id="nomClientComplet" />
+          </div>
+        </div>
+        <div class="line"><label>Adresse</label><input id="adresseClient" /></div>
+        <div class="line"><label>Ville</label><input id="villeClient" /></div>
+        <div class="line"><label>Téléphone</label><input id="telClient" /></div>
+        <div class="line"><label>Email</label><input id="emailClient" /></div>
+      </div>
+    </div>
+  </div>
+  <div class="fullWidthBox">MATERIEL + MAIN D’ŒUVRE</div>
+  <table class="tableauMat" id="tableMat">
+    <thead>
+      <tr><th>Désignation</th><th>PU</th><th>Qté</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><textarea class="desc"></textarea></td>
+        <td><input class="pu" type="number" step="0.01" /></td>
+        <td><input class="qte" type="number" value="1" /></td>
+        <td><input class="total" readonly /></td>
+      </tr>
+    </tbody>
+  </table>
+ <div style="margin-top:15px;text-align:left;">
+  <button type="button" id="addGlobal" class="btnAddLine">
+    ➕ Ajouter une ligne
+  </button>
+
+  <button type="button" id="deleteGlobal" class="btnDeleteLine">
+    🗑 Supprimer une ligne
+  </button>
+</div>
+  <div class="totalBox">
+    <div class="totalLine"><span>HT</span><span id="htCalc">0</span></div>
+    <div class="totalLine"><span>TVA</span><span id="tvaCalc">0</span></div>
+    <div id="tvaMention" style="font-size:12px;"></div>
+    <div class="totalLine totalTTC"><span>TTC</span><span id="ttcCalc">0</span></div>
+  </div>
+  <div id="tvaDisplayLine" style="margin-top:20px;font-size:13px;display:flex;gap:15px;align-items:center;flex-wrap:wrap;">
+    <strong>Régime TVA :</strong>
+    <label><input type="radio" name="tvaDisplay" value="auto" />0% autoliquidation</label>
+    <label><input type="radio" name="tvaDisplay" value="5.5" />5.5% réno énergétique</label>
+    <label><input type="radio" name="tvaDisplay" value="10" />10% réno</label>
+    <label><input type="radio" name="tvaDisplay" value="20" />20% neuf</label>
+  </div>
+  <div id="tvaAutoMsg" style="
+  display:none;
+  margin-top:6px;
+  font-size:14px;
+  color:#0b2a5b;
+  font-weight:500;
+  text-decoration: underline;
+  text-decoration-color:#2f6ea8;
+">
+  Auto liquidation de la TVA selon l'article 25 de la loi de finance 2014
+</div>
+
+  <div id="signatureSection">
+  <div class="signatureBox">Signature client</div>
+
+  <div class="signatureBox bpaBox" id="bonPourAccord">
+    <div class="bpaContent">
+
+      <div><strong>Bon pour accord</strong></div>
+
+      <br>
+
+      <div>Fait à : ____________________</div>
+
+      <br>
+
+      <div id="bpaNomClient">Nom :</div>
+
+      <br>
+
+      <div>Signature :</div>
+
+    </div>
+  </div>
+</div>
+
+  <div id="topButtons">
+
+  <button class="print">
+    <i class="fas fa-print"></i> Imprimer
+  </button>
+
+  <button class="pdf" onclick="exportPDF()">
+    <i class="fas fa-file-pdf"></i> PDF
+  </button>
+
+  <button class="mail" onclick="sendMail()">
+    <i class="fas fa-envelope"></i> Mail
+  </button>
+
+  <button class="new" onclick="newInvoice()">
+    <i class="fas fa-plus-circle"></i> Nouvelle
+  </button>
+
+</div>
+  <div id="historyBox" style="margin-top:30px;padding:15px;border:1px solid #ddd;border-radius:8px;">
+    <div class="history-controls" style="justify-content:space-between;margin-bottom:10px;">
+
+  <h3 style="margin:0;">📁 Historique des factures</h3>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+
+    🔍 <input id="historySearch" placeholder="Rechercher client..." style="padding:5px;" />
+
+    Trier :
+    <select id="historySortField">
+      <option value="date">Date</option>
+      <option value="id">Numéro</option>
+      <option value="client">Client</option>
+    </select>
+
+    <button id="historySortDir" onclick="toggleHistorySort()">⬇</button>
+
+  </div>
+
+</div>
+    <div id="historyList" style="display:flex;flex-direction:column;gap:8px;"></div>
+  </div>
+</div>
+<script>
+/* =========================
+   APP FACTURIER CLEAN
+========================= */
+
+
+/* ================= INIT GLOBAL ================= */
+function initApp() {
+
+  initDate();
+  initTable();
+  initEvents();
+  initAutoResizeTextarea();
+
+  initHistoryUI();
+
+  // ================= HISTORY SORT RESTORE =================
+const savedDir = localStorage.getItem("historySortDir");
+
+const btn = document.getElementById("historySortDir");
+
+if (btn) {
+  if (savedDir === "⬆" || savedDir === "⬇") {
+    btn.textContent = savedDir;
+  } else {
+    btn.textContent = "⬇";
+  }
+}
+
+  loadHistory();
+
+  generateInvoiceNumber(true);
+  updateTotals();
+}
+document.addEventListener("DOMContentLoaded", initApp);
+
+// ✅ SÉCURITÉ PRINT (ICI EXACTEMENT)
+window.addEventListener("beforeprint", () => {
+
+  const root = document.documentElement;
+
+  const base = parseFloat(
+    getComputedStyle(root).getPropertyValue("--logo-offset")
+  ) || 0;
+
+  // impression = 1/3 du décalage écran
+  root.style.setProperty("--logo-offset-print", (base / 3) + "px");
+const sasuBase = parseFloat(
+  getComputedStyle(root).getPropertyValue("--sasu-offset")
+) || 0;
+
+root.style.setProperty("--sasu-offset-print", (sasuBase / 3) + "px");
+
+  document.body.classList.add("print-mode");
+
+  preparePrint();
+});
+window.addEventListener("afterprint", restorePrint);
+
+
+
+
+ 
+/* ================= STATE GLOBAL ================= */
+let currentInvoice = null;
+
+
+/* ================= ELEMENTS ================= */
+const els = {
+  factureNumero: () => document.getElementById("factureNumero"),
+  nomClient: () => document.getElementById("nomClientComplet"),
+  email: () => document.getElementById("emailClient"),
+  date: () => document.getElementById("dateFacture"),
+  docTitle: () => document.getElementById("docTitle"),
+  typeLabel: () => document.getElementById("typeLabel"),
+  tvaMode: () => document.getElementById("tvaMode"),
+  ht: () => document.getElementById("htCalc"),
+  tva: () => document.getElementById("tvaCalc"),
+  ttc: () => document.getElementById("ttcCalc"),
+};
+
+/* ================= DATE ================= */
+function initDate() {
+  const d = new Date();
+  els.date().value =
+    String(d.getDate()).padStart(2, "0") + "/" +
+    String(d.getMonth() + 1).padStart(2, "0") + "/" +
+    d.getFullYear();
+}
+
+/* ================= TABLE ================= */
+function initTable() {
+  document.querySelectorAll("#tableMat tbody tr").forEach(bindRow);
+}
+
+function bindRow(row) {
+  const pu = row.querySelector(".pu");
+  const qte = row.querySelector(".qte");
+  const total = row.querySelector(".total");
+
+  const calc = () => {
+    const p = +pu.value || 0;
+    const q = +qte.value || 0;
+    total.value = (p * q).toFixed(2);
+    updateTotals();
+  };
+
+  pu.addEventListener("input", calc);
+  qte.addEventListener("input", calc);
+}
+
+/* ================= TOTAL ================= */
+function updateTotals(save = true) {
+  let ht = 0;
+
+  document.querySelectorAll("#tableMat tbody tr").forEach(r => {
+    ht += +r.querySelector(".total").value || 0;
+  });
+
+  const taux =
+    els.tvaMode().value === "20" ? 0.2 :
+    els.tvaMode().value === "10" ? 0.1 :
+    els.tvaMode().value === "5.5" ? 0.055 : 0;
+
+  const tva = ht * taux;
+  const ttc = ht + tva;
+
+  els.ht().textContent = ht.toFixed(2);
+  els.tva().textContent = tva.toFixed(2);
+  els.ttc().textContent = ttc.toFixed(2);
+
+  if (save) saveInvoice();
+}
+
+function syncClientAndTVA() {
+
+  // ================= CLIENT =================
+  const civilite = document.getElementById("civiliteClient").value;
+  const nom = document.getElementById("nomClientComplet").value;
+
+  document.getElementById("nomClient").value =
+    (civilite ? civilite + " " : "") + nom;
+
+  // ================= TVA (RADIO ↔ SELECT) =================
+  const tvaSelect = document.getElementById("tvaMode");
+  const radios = document.querySelectorAll('input[name="tvaDisplay"]');
+
+  radios.forEach(r => {
+    if (r.value === tvaSelect.value) {
+      r.checked = true;
+    }
+  });
+
+  // ================= TVA MENTION =================
+  updateTVAMention();
+}
+
+function updateTVAMention() {
+  const mode = document.getElementById("tvaMode").value;
+  const msg = document.getElementById("tvaAutoMsg");
+
+  if (!msg) return;
+
+  if (mode === "auto") {
+    msg.style.display = "block";
+  } else {
+    msg.style.display = "none";
+  }
+}
+
+
+/* ================= EVENTS ================= */
+function initEvents() {
+  document.getElementById("addGlobal").onclick = addLine;
+  document.getElementById("deleteGlobal").onclick = deleteLine;
+
+  document.querySelector(".print").onclick = () => window.print();
+  document.querySelector(".pdf").onclick = exportPDF;
+  document.querySelector(".new").onclick = newInvoice;
+  document.querySelector(".mail").onclick = sendMail;
+
+  els.docTitle().onclick = toggleType;
+  els.typeLabel().onclick = toggleType;
+
+  // EVENTS UNIQUES → SYNC GLOBAL
+
+  document.getElementById("civiliteClient")
+    .addEventListener("change", syncAll);
+
+  document.getElementById("nomClientComplet")
+    .addEventListener("input", syncAll);
+
+  document.getElementById("tvaMode")
+  .addEventListener("change", syncAll);
+
+// 👉 RADIO → SELECT
+document.querySelectorAll('input[name="tvaDisplay"]').forEach(radio => {
+  radio.addEventListener("change", () => {
+    document.getElementById("tvaMode").value = radio.value;
+    syncAll();
+  });
+});
+
+} // ✅ fermeture OBLIGATOIRE
+
+
+
+function updateBonPourAccordNom() {
+
+  const civilite = document.getElementById("civiliteClient")?.value || "";
+  const nom = document.getElementById("nomClientComplet")?.value || "";
+
+  const fullName = (civilite ? civilite + " " : "") + nom;
+
+  const el = document.getElementById("bpaNomClient");
+
+  if (el) {
+    el.textContent = "Nom : " + fullName;
+  }
+}
+
+function syncAll() {
+
+  // CLIENT
+  const civiliteEl = document.getElementById("civiliteClient");
+  const nomEl = document.getElementById("nomClientComplet");
+  const nomFactureEl = document.getElementById("nomClient");
+
+  if (civiliteEl && nomEl && nomFactureEl) {
+    const civilite = civiliteEl.value || "";
+    const nom = nomEl.value || "";
+
+    nomFactureEl.value = (civilite ? civilite + " " : "") + nom;
+  }
+
+  // BON POUR ACCORD
+  updateBonPourAccordNom();
+
+  // TVA MESSAGE
+  const msg = document.getElementById("tvaAutoMsg");
+  const tvaSelect = document.getElementById("tvaMode");
+
+  if (msg && tvaSelect) {
+    msg.style.display = (tvaSelect.value === "auto") ? "block" : "none";
+  }
+
+  // 🔥 AJOUT ICI
+  syncClientAndTVA();
+
+  updateTotals(false);
+
+  if (typeof saveInvoice === "function") {
+    saveInvoice();
+  }
+}
+
+
+
+
+
+ function initAutoResizeTextarea() {
+
+  document.addEventListener("input", (e) => {
+    if (e.target && e.target.tagName === "TEXTAREA") {
+      autoResize(e.target);
+    }
+  });
+
+  // ✅ resize au chargement (important PDF + modale)
+  document.querySelectorAll("textarea").forEach(autoResize);
+}
+
+function autoResize(el) {
+  if (!el) return;
+
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
+
+/* ================= TYPE ================= */
+function toggleType() {
+  const current = els.docTitle().textContent;
+  setType(current === "DEVIS" ? "FACTURE" : "DEVIS");
+}
+
+function setType(type) {
+  els.docTitle().textContent = type;
+  els.typeLabel().textContent = type;
+  generateInvoiceNumber(true);
+  loadHistory();
+
+  if (type === "FACTURE") {
+    document.body.classList.add("facture-mode");
+    document.body.classList.remove("devis-mode");
+  } else {
+    document.body.classList.add("devis-mode");
+    document.body.classList.remove("facture-mode");
+  }
+}
+
+
+
+/* ================= NUMERO ================= */
+function generateInvoiceNumber(force = false) {
+  if (els.factureNumero().value && !force) return;
+
+  const type = els.docTitle().textContent === "FACTURE" ? "FACT" : "DEV";
+  const d = new Date();
+
+  const key = `counter_${type}_${d.getFullYear()}${d.getMonth()+1}${d.getDate()}`;
+
+  let c = +localStorage.getItem(key) || 0;
+  c++;
+  localStorage.setItem(key, c);
+
+  els.factureNumero().value =
+    `${type}-${d.getFullYear()}${d.getMonth()+1}${d.getDate()}-${String(c).padStart(3,"0")}`;
+}
+
+/* ================= SAVE ================= */
+function saveInvoice() {
+  const id = els.factureNumero().value;
+  if (!id) return;
+
+  const data = {
+    id,
+    type: els.docTitle().textContent,
+    date: els.date().value,
+    client: els.nomClient().value,
+    email: els.email().value,
+    rows: []
+  };
+
+  document.querySelectorAll("#tableMat tbody tr").forEach(r => {
+    data.rows.push({
+      d: r.querySelector(".desc").value,
+      p: r.querySelector(".pu").value,
+      q: r.querySelector(".qte").value
+    });
+  });
+
+  localStorage.setItem("facture_" + id, JSON.stringify(data));
+}
+
+/* ================= HISTORY ================= */
+function initHistoryUI() {
+  const search = document.getElementById("historySearch");
+  const field = document.getElementById("historySortField");
+  const dirBtn = document.getElementById("historySortDir");
+
+  search?.addEventListener("input", loadHistory);
+  field?.addEventListener("change", loadHistory);
+
+  dirBtn?.addEventListener("click", () => {
+    dirBtn.dataset.dir = dirBtn.dataset.dir === "asc" ? "desc" : "asc";
+    loadHistory();
+  });
+}
+
+function loadHistory() {
+  const box = document.getElementById("historyList");
+  if (!box) return;
+
+  let list = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+
+    if (!key || !key.startsWith("facture_")) continue;
+
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+
+    try {
+      const item = JSON.parse(raw);
+      if (item && item.id) list.push(item);
+    } catch (e) {
+      console.warn("JSON invalide:", key);
+    }
+  } // ✅ FIN DU FOR
+
+  // 🔍 filtre recherche
+  const search =
+    document.getElementById("historySearch")?.value?.toLowerCase() || "";
+
+  if (search) {
+    list = list.filter(d =>
+      (d.client || "").toLowerCase().includes(search) ||
+      (d.id || "").toLowerCase().includes(search)
+    );
+  }
+
+  // 📊 tri
+  const field = document.getElementById("historySortField")?.value || "date";
+  const dirBtn = document.getElementById("historySortDir");
+  const dir = dirBtn?.textContent === "⬆" ? "asc" : "desc";
+
+  list.sort((a, b) => {
+    let A = a[field] || "";
+    let B = b[field] || "";
+
+    if (field === "date") {
+      A = normalizeDate(A);
+      B = normalizeDate(B);
+    }
+
+    if (A < B) return dir === "asc" ? -1 : 1;
+    if (A > B) return dir === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  box.innerHTML = "";
+
+  list.forEach(d => {
+    const div = document.createElement("div");
+
+    div.style.cssText =
+      "padding:8px;border:1px solid #ccc;margin:5px;border-radius:6px;cursor:pointer;background:#f9f9f9;";
+
+    div.innerHTML = `
+      <b>${d.id || ""}</b><br>
+      ${d.client || ""} - ${d.date || ""}
+    `;
+
+    div.onclick = () => openModal(d);
+    box.appendChild(div);
+  });
+}
+
+
+/* ================= LIGNES ================= */
+function addLine() {
+  const row = document.querySelector("#tableMat tbody tr").cloneNode(true);
+  row.querySelectorAll("input,textarea").forEach(e => e.value = "");
+  document.querySelector("#tableMat tbody").appendChild(row);
+  bindRow(row);
+}
+
+function deleteLine() {
+  const rows = document.querySelectorAll("#tableMat tbody tr");
+  if (rows.length > 1) rows[rows.length - 1].remove();
+}
+
+/* ================= ACTIONS ================= */
+function newInvoice() {
+
+  // vider tous les champs
+  document.querySelectorAll("input,textarea").forEach(e => e.value = "");
+
+  // 🔥 reset du tableau → 1 seule ligne
+  const tbody = document.querySelector("#tableMat tbody");
+  tbody.innerHTML = "";
+
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td><textarea class="desc"></textarea></td>
+    <td><input class="pu" type="number" step="0.01"></td>
+    <td><input class="qte" type="number" value="1"></td>
+    <td><input class="total" readonly></td>
+  `;
+
+  tbody.appendChild(row);
+
+  bindRow(row);
+
+  // resize propre textarea
+  autoResize(row.querySelector("textarea"));
+
+  // reset numéro + totaux
+  generateInvoiceNumber(true);
+  updateTotals();
+}
+
+function sendMail() {
+
+  const email = document.getElementById("emailClient").value;
+  const nomClient = document.getElementById("nomClient").value;
+  const type = document.getElementById("docTitle").textContent;
+
+  if (!email) {
+    alert("Email manquant");
+    return;
+  }
+
+  const isFacture = type === "FACTURE";
+
+  // calcul total depuis la table
+  let total = 0;
+
+  document.querySelectorAll("#tableMat tbody tr").forEach(r => {
+    const p = parseFloat(r.querySelector(".pu").value) || 0;
+    const q = parseFloat(r.querySelector(".qte").value) || 0;
+    total += p * q;
+  });
+
+  const numero = document.getElementById("factureNumero").value;
+  const prefix = isFacture ? "FACT" : "DEV";
+
+  const message =
+`Bonjour ${nomClient || ""},
+
+Veuillez trouver ci-joint votre ${isFacture ? "facture" : "devis"} n° ${numero} d'un montant de : ${total.toFixed(2)} €.
+
+Cordialement,
+SASU UNIVERS THERMIQUE
+📞 06 09 90 49 22`;
+
+  const subject = `${prefix} ${numero}`;
+
+  window.location.href =
+    `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+}
+
+
+
+/* ================= PDF (simplifié) ================= */
+async function exportPDF() {
+
+  const element = document.getElementById("invoiceContent");
+  if (!element) return;
+
+  document.body.classList.add("pdf-mode");
+
+  preparePrint();
+
+  try {
+
+    const canvas = await html2canvas(element, {
+      scale: 3,              // 🔥 ultra qualité
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = 210;
+    const pageHeight = 297;
+
+    const margin = 10;
+    const usableWidth = pageWidth - margin * 2;
+
+    const imgWidth = usableWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // ================= PAGE 1 =================
+    pdf.addImage(
+      imgData,
+      "JPEG",
+      margin,
+      margin,
+      imgWidth,
+      imgHeight
+    );
+
+    heightLeft -= (pageHeight - margin * 2);
+
+    // ================= PAGES SUIVANTES =================
+    while (heightLeft > 0) {
+
+      position = heightLeft - imgHeight;
+
+      pdf.addPage();
+
+      pdf.addImage(
+        imgData,
+        "JPEG",
+        margin,
+        position + margin,
+        imgWidth,
+        imgHeight
+      );
+
+      heightLeft -= (pageHeight - margin * 2);
+    }
+
+    // ================= NOM FICHIER PRO =================
+
+const numero = document.getElementById("factureNumero")?.value || "000";
+const client = document.getElementById("nomClientComplet")?.value || "CLIENT";
+const type = document.getElementById("docTitle")?.textContent === "FACTURE" ? "FACT" : "DEV";
+
+// date JJ-MM-AA (SAFE fichiers)
+const d = new Date();
+const jj = String(d.getDate()).padStart(2,"0");
+const mm = String(d.getMonth()+1).padStart(2,"0");
+const aa = String(d.getFullYear()).slice(-2);
+
+// récup du compteur (001, 002…)
+const count = numero.split("-").pop();
+
+// nom final propre
+const filename = `${type}-${jj}-${mm}-${aa}-${count}_${client}`
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/\s+/g, "_")
+  .replace(/[^\w\-]/g, "");
+
+// sauvegarde PDF
+pdf.save(filename + ".pdf");
+
+if (typeof saveInvoice === "function") saveInvoice();
+
+} catch (err) {
+  console.error("PDF ERROR :", err);
+} finally {
+  restorePrint();
+  document.body.classList.remove("pdf-mode");
+}
+}
+
+function normalizeDate(d) {
+  if (!d) return 0;
+
+  // format JJ/MM/AAAA
+  const parts = d.split("/");
+  if (parts.length !== 3) return 0;
+
+  const [day, month, year] = parts;
+  return new Date(+year, +month - 1, +day).getTime();
+}
+
+function openModal(d) {
+
+  console.log("OPEN MODAL DATA :", d);
+
+  currentInvoice = d || {};
+
+  const modal = document.getElementById("modal");
+  const content = document.getElementById("modalContent");
+
+  const safe = {
+    id: d?.id || "SANS ID",
+    client: d?.client || "❌ VIDE",
+    email: d?.email || "❌ VIDE",
+    date: d?.date || "❌ VIDE",
+    rows: Array.isArray(d?.rows) ? d.rows : []
+  };
+
+  content.innerHTML = `
+    <div style="font-family:Arial;font-size:14px;line-height:1.6;">
+
+      <h3>📄 ${safe.id}</h3>
+
+      <p><b>Client :</b> ${safe.client}</p>
+      <p><b>Email :</b> ${safe.email}</p>
+      <p><b>Date :</b> ${safe.date}</p>
+
+      <hr>
+
+      <p><b>Nombre de lignes :</b> ${safe.rows.length}</p>
+
+      <div style="margin-top:10px;">
+        ${safe.rows.map((r, i) => `
+          <div style="border:1px solid #ddd;padding:6px;margin-bottom:5px;">
+            <b>Ligne ${i + 1}</b><br>
+            Désignation : ${r.d || ""}<br>
+            PU : ${r.p || ""}<br>
+            Qté : ${r.q || ""}
+          </div>
+        `).join("")}
+      </div>
+
+    </div>
+  `;
+
+  modal.style.display = "flex";
+}
+
+
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+}
+
+function printModal() {
+
+  if (!currentInvoice) {
+    console.error("Aucune facture à imprimer");
+    return;
+  }
+
+  // 👉 injecte la facture dans le formulaire principal
+  loadInvoiceToForm(currentInvoice);
+
+  // petit délai pour DOM update
+  setTimeout(() => {
+    window.print();
+  }, 100);
+}
+ 
+
+
+function mailFromModal() {
+
+  if (!currentInvoice) {
+    alert("Aucune facture sélectionnée");
+    return;
+  }
+
+  const type = currentInvoice.type || "DEVIS";
+  const isFacture = type === "FACTURE";
+
+  const nomClient = currentInvoice.client || "";
+  const email = currentInvoice.email || "";
+
+  // calcul montant
+  let total = 0;
+  (currentInvoice.rows || []).forEach(r => {
+    total += (parseFloat(r.p) || 0) * (parseFloat(r.q) || 0);
+  });
+
+  const numero = currentInvoice.id || "";
+
+  const prefix = isFacture ? "FACT" : "DEV";
+
+  const message =
+`Bonjour ${nomClient || ""},
+
+Veuillez trouver ci-joint votre ${isFacture ? "facture" : "devis"} n° ${numero} d'un montant de : ${total.toFixed(2)} €.
+
+Cordialement,
+SASU UNIVERS THERMIQUE
+📞 06 09 90 49 22`;
+
+const subject = `${prefix} ${numero}`;
+
+window.location.href =
+  `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+
+}
+
+function editFromModal() {
+
+  // ❌ sécurité
+  if (!currentInvoice) {
+    console.error("Aucune facture sélectionnée");
+    return;
+  }
+
+  // fermer modale
+  closeModal();
+
+  // ================= FACTURE =================
+  document.getElementById("factureNumero").value = currentInvoice.id || "";
+  const fullName = currentInvoice.client || "";
+
+const parts = fullName.split(" ");
+
+const civilite = parts.shift();
+const nom = parts.join(" ");
+
+document.getElementById("civiliteClient").value = civilite || "Mr";
+document.getElementById("nomClientComplet").value = nom || "";
+  document.getElementById("emailClient").value = currentInvoice.email || "";
+  document.getElementById("dateFacture").value = currentInvoice.date || "";
+
+  // ================= TABLE =================
+  const tbody = document.querySelector("#tableMat tbody");
+  tbody.innerHTML = "";
+
+  (currentInvoice.rows || []).forEach(r => {
+
+    const row = document.createElement("tr");
+
+    const td1 = document.createElement("td");
+    const ta = document.createElement("textarea");
+    ta.className = "desc";
+    ta.value = r.d || "";
+    td1.appendChild(ta);
+
+    const td2 = document.createElement("td");
+    const pu = document.createElement("input");
+    pu.type = "number";
+    pu.value = r.p || 0;
+    pu.className = "pu";
+    td2.appendChild(pu);
+
+    const td3 = document.createElement("td");
+    const qte = document.createElement("input");
+    qte.type = "number";
+    qte.value = r.q || 1;
+    qte.className = "qte";
+    td3.appendChild(qte);
+
+    const td4 = document.createElement("td");
+    const total = document.createElement("input");
+    total.className = "total";
+    total.readOnly = true;
+    td4.appendChild(total);
+
+    row.appendChild(td1);
+    row.appendChild(td2);
+    row.appendChild(td3);
+    row.appendChild(td4);
+
+    tbody.appendChild(row);
+    bindRow(row);
+
+    // ✔ AUTO RESIZE ICI
+    autoResize(ta);
+  });
+
+  updateTotals(false);
+
+  console.log("FACTURE CHARGÉE POUR MODIFICATION :", currentInvoice);
+}
+
+ 
+
+function preparePrint() {
+
+  window._printReplacements = [];
+
+  document.querySelectorAll("textarea").forEach(textarea => {
+
+    const div = document.createElement("div");
+
+    div.style.whiteSpace = "pre-wrap";
+    div.style.wordBreak = "break-word";
+    div.style.fontFamily = "Arial";
+    div.style.fontSize = "14px";
+    div.style.lineHeight = "1.4";
+    div.style.padding = "4px";
+    div.style.minHeight = textarea.offsetHeight + "px";
+
+    div.textContent = textarea.value;
+
+    textarea.style.display = "none";
+    textarea.parentNode.insertBefore(div, textarea);
+
+    window._printReplacements.push({
+      original: textarea,
+      clone: div
+    });
+  });
+
+}
+
+
+function restorePrint() {
+
+  if (!window._printReplacements) return;
+
+  window._printReplacements.forEach(r => {
+    r.clone.replaceWith(r.original);
+    r.original.style.display = "";
+  });
+
+  window._printReplacements = [];
+}
+
+function loadInvoiceToForm(d) {
+
+  document.getElementById("factureNumero").value = d.id || "";
+  document.getElementById("dateFacture").value = d.date || "";
+  document.getElementById("nomClientComplet").value = d.client || "";
+
+  const tbody = document.querySelector("#tableMat tbody");
+  tbody.innerHTML = "";
+
+  (d.rows || []).forEach(r => {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td><textarea class="desc">${r.d || ""}</textarea></td>
+      <td><input class="pu" type="number" value="${r.p || 0}"></td>
+      <td><input class="qte" type="number" value="${r.q || 1}"></td>
+      <td><input class="total" readonly></td>
+    `;
+
+    tbody.appendChild(row);
+    bindRow(row);
+  });
+
+  updateTotals(false);
+tbody.querySelectorAll("textarea").forEach(autoResize);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+<div id="modal">
+  <div class="modalBox">
+
+    <div class="modalHeader">
+      <h2 id="modalTitle">Détail document</h2>
+      <button class="closeBtn" onclick="closeModal()">✖</button>
+    </div>
+
+    <div id="modalContent" class="modalContent"></div>
+
+<p style="font-size:12px;color:#666;text-align:center;margin-bottom:8px;">
+  ✏ Modifier ouvrira la facture dans le formulaire principal
+</p>
+
+    <div class="modalFooter">
+  <button onclick="printModal()" class="btnPrint">🖨 Imprimer</button>
+  <button onclick="mailFromModal()" class="btnMail">✉ Envoyer</button>
+
+  <button onclick="editFromModal()" style="background:#ff9800;color:white;">
+    ✏ Modifier
+  </button>
+
+  <button onclick="closeModal()" class="btnClose">Fermer</button>
+</div>
+
+  </div>
+</div>
+
+
+</body>
+
+
+</html>
