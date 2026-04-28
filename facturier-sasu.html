@@ -1060,6 +1060,28 @@ body.facture-mode .colTitle {
 
 }
 
+.header table {
+  width: 100%;
+}
+
+.header td {
+  vertical-align: top;
+}
+
+.header img {
+  max-width: 180px;
+  height: auto;
+}
+
+@media print {
+  .header table {
+    width: 100%;
+  }
+}
+
+
+
+
 
 
 
@@ -1075,26 +1097,51 @@ body.facture-mode .colTitle {
 <body>
 <div id="invoiceContent">
   <div class="header">
-    <div class="logo">
-  <img src="logo.png">
+
+  <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+
+    <tr>
+
+      <!-- LOGO (inchangé) -->
+      <td style="width:33%; vertical-align:top; text-align:left;">
+        <div class="logo">
+          <img src="logo.png" style="max-width:180px;">
+        </div>
+      </td>
+
+      <!-- CENTRE (inchangé) -->
+      <td style="width:34%; vertical-align:top; text-align:center;">
+        <div class="centerColumn">
+          <div id="docTitle" class="docTitle">DEVIS</div>
+        </div>
+      </td>
+
+      <!-- BLOC SOCIÉTÉ (100% identique à toi) -->
+      <td style="width:33%; vertical-align:top; text-align:right;">
+        <div class="companyBox">
+
+          <div style="font-weight:bold;font-size:14px;margin-bottom:6px;">
+            SASU UNIVERS THERMIQUE
+          </div>
+
+          <div style="line-height:1.4;">
+            1 RUE DU MONT SAINT LOUP<br />
+            10420 LES NOES-PRES-TROYES<br /><br />
+
+            <strong>SIRET :</strong> 853 891 505 00028<br />
+            <strong>TVA :</strong> FR72853891505<br /><br />
+
+            📞 06 09 90 49 22
+          </div>
+
+        </div>
+      </td>
+
+    </tr>
+
+  </table>
+
 </div>
-
-
-    <div class="centerColumn"><div id="docTitle" class="docTitle">DEVIS</div></div>
-    <div class="rightColumn">
-      <div class="companyBox">
-        <div style="font-weight:bold;font-size:14px;margin-bottom:6px;">
-          SASU UNIVERS THERMIQUE
-        </div>
-        <div style="line-height:1.4;">
-          1 RUE DU MONT SAINT LOUP<br />10420 LES NOES-PRES-TROYES<br /><br />
-          <strong>SIRET :</strong> 853 891 505 00028<br />
-          <strong>TVA :</strong> FR72853891505<br /><br />
-          📞 06 09 90 49 22
-        </div>
-      </div>
-    </div>
-  </div>
   <!-- CLIENT / FACTURE -->
   <div class="section twoCols">
     <div class="col">
