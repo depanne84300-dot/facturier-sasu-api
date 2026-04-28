@@ -1,18 +1,15 @@
- 
-<style>
-/* =============================<head>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Facturier Univers Thermique</title>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-
-
- BASE ============================= */
+ 
+<style>
+/* ============================= BASE ============================= */
 
 
 body {
@@ -77,39 +74,30 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  position: relative;
   width: 100%;
-  gap: 10px;
-  flex-wrap: wrap; /* IMPORTANT mobile */
+  box-sizing: border-box;
 }
-
 .logo {
-  width: 180px;
+  width: 200px;
   flex-shrink: 0;
 }
-
 .logo img {
   width: 100%;
   object-fit: contain;
 }
-
 .centerColumn {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
-
-  position: static;   /* FIX IMPORTANT */
-  transform: none;    /* FIX IMPORTANT */
 }
-
 .rightColumn {
   width: 320px;
   display: flex;
   justify-content: flex-end;
   flex-shrink: 0;
 }
-
 .companyBox {
   width: 100%;
   background: #e3f2fd;
@@ -123,17 +111,17 @@ textarea {
   left: var(--sasu-offset, 0px);
 }
 
-/* ============ SASU OFFSET ============ */
-:root {
-  --sasu-offset: -190px;
-}
 
-/* ================= PRINT ================= */
+
 @media print {
   .companyBox {
     left: calc(var(--sasu-offset-print, 0px) + 90px);
   }
 }
+:root {
+  --sasu-offset: -190px; /* ajuste ici pour déplacer à gauche */
+}
+
 
 /* ============================= SECTIONS ============================= */
 .section {
@@ -959,89 +947,12 @@ body.facture-mode .colTitle {
 
 }
 
-@media (max-width: 768px) {
-
-  body {
-    margin: 0;
-    padding: 10px;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  .container, .main, .wrapper {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .row, .flex, .ligne, .header {
-    display: flex;
-    flex-direction: column !important;
-  }
-
-  .left, .right, .col, .bloc {
-    width: 100% !important;
-  }
-
-  input, textarea, select {
-    width: 100% !important;
-    font-size: 16px;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-
-}
-
-@media (max-width: 768px) {
-
-  .header {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .centerColumn {
-    order: 1;
-    width: 100%;
-  }
-
-  .logo {
-    order: 2;
-    width: 140px;
-  }
-
-  .rightColumn {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-  }
-
-}
 
 
-@media (max-width: 768px) {
 
-  .header {
-    flex-direction: column;
-    align-items: center;
-  }
 
-  .logo {
-    width: 140px;
-  }
 
-  .rightColumn {
-    width: 100%;
-    justify-content: center;
-  }
 
-  .companyBox {
-    left: 0 !important;
-  }
-}
 
 
 
@@ -1064,7 +975,7 @@ body.facture-mode .colTitle {
 <div id="invoiceContent">
   <div class="header">
     <div class="logo">
-  <img src="/logo.png">
+  <img src="data:image/png;base64,XXXXX" style="width:100%;object-fit:contain;">
 </div>
 
 
